@@ -16,10 +16,10 @@ async function connectToMongo() {
 
 const mainDB = 'aeonaxy-nodejs'
 const passwordsDb = 'aeonaxy-nodejs-pass'
-
+const contentDb = 'aeonaxy-nodejs-content'
 
 const mongoClient = await connectToMongo()
 
-export { mongoClient, mainDB, passwordsDb }
+export { mongoClient, mainDB, passwordsDb, contentDb }
 export default mongoClient
 

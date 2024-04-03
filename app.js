@@ -10,6 +10,12 @@ expressApp.use(express.json());
 import userAPIRouter from "./routes/user.js";
 expressApp.use('/api/user', userAPIRouter)
 
+import courseRouter from "./routes/courseRoutes.js";
+expressApp.use('/api/course', courseRouter)
+
+import moduleRouter from "./routes/moduleRoutes.js";
+expressApp.use('/api/module', moduleRouter)
+
 // ! webhooks
 import resendWebhooksRouter from "./routes/resendWebhooks.js";
 expressApp.use('/webhooks', resendWebhooksRouter)
@@ -26,4 +32,4 @@ async function startServer() {
     }
 }
 
-startServer()
+await startServer()

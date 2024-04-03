@@ -20,8 +20,8 @@ import CustomError from "../Classes/customError.js";
 import configDotenv from 'dotenv'
 configDotenv.config()
 
-// ? setup custom modules
-import {sendVerificationEmail} from "../modules/resendapi.js";
+// ? setup custom customModules
+import {sendVerificationEmail} from "../customModules/resendapi.js";
 
 
 const userAPIRouter = Router()
