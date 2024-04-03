@@ -9,7 +9,7 @@ async function createVideoObject(moduleId, videoDetails) {
     }
     console.log('Video Object created')
     return {
-        moduleId: ObjectId(moduleId),
+        moduleId: new ObjectId(moduleId),
         title: videoDetails.title,
         description: videoDetails.description,
         content: videoDetails.content,
@@ -23,19 +23,20 @@ export async function addVideo(moduleId, videoDetails) {
     console.log('Inserted new video: ', videoRef.insertedId)
 
     // update the module data
-    const module = await mongoClient.db(contentDb).collection('modules').findOne({_id: ObjectId(moduleId)})
-    if (module.length === 0)
+    const module = await mongoClient.db(contentDb).collection('modules').findOne({_id: new ObjectId(moduleId)})
+    if (!module) // Check if module is null
         throw new Error('Module not found in database.')
-    else {
+    else if (module.length === 0) {
+        throw new Error('Module not found in database. (length = 0)')
+    } else {
         // update
         module.videos.push(new ObjectId(videoRef.insertedId))
-        const updatedModule = await mongoClient.db(contentDb).collection('modules').updateOne({_id: ObjectId(moduleId)}, {$set: module})
+        const updatedModule = await mongoClient.db(contentDb).collection('modules').updateOne({_id: new ObjectId(moduleId)}, {$set: module})
         return videoRef
     }
 }
-
 export async function getVideo(videoId) {
-    const video = await mongoClient.db(contentDb).collection('videos').findOne({_id: ObjectId(videoId)})
+    const video = await mongoClient.db(contentDb).collection('videos').findOne({_id: new ObjectId(videoId)})
     if (video.length === 0)
         throw new Error('Video not found in database.')
     return video
@@ -43,7 +44,7 @@ export async function getVideo(videoId) {
 
 
 export async function getMultipleVideos(videoIds) {
-    const objectIds = videoIds.map(id => ObjectId(id));
+    const objectIds = videoIds.map(id => new ObjectId(id));
     const videos = await mongoClient.db(contentDb).collection('videos').find({_id: {$in: objectIds}}).toArray();
     if (videos.length === 0)
         throw new Error('Videos not found in database.');

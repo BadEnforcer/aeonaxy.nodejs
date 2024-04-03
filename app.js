@@ -16,6 +16,9 @@ expressApp.use('/api/course', courseRouter)
 import moduleRouter from "./routes/moduleRoutes.js";
 expressApp.use('/api/module', moduleRouter)
 
+import videoRoutes from "./routes/videoRoutes.js";
+expressApp.use('/api/video', videoRoutes)
+
 // ! webhooks
 import resendWebhooksRouter from "./routes/resendWebhooks.js";
 expressApp.use('/webhooks', resendWebhooksRouter)
