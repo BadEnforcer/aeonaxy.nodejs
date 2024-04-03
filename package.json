@@ -1,0 +1,31 @@
+{
+  "name": "nodejs-dev-internship",
+  "version": "1.0.0",
+  "description": "Submitted by Rajdwivedipc@gmail.com",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "test": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BadEnforcer/aeonaxy.nodejs.git"
+  },
+  "author": "raj dwivedi",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/BadEnforcer/aeonaxy.nodejs/issues"
+  },
+  "homepage": "https://github.com/BadEnforcer/aeonaxy.nodejs#readme",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-session": "^1.18.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.5.0",
+    "multer": "^1.4.5-lts.1",
+    "resend": "^3.2.0",
+    "uuid": "^9.0.1"
+  }
+}
