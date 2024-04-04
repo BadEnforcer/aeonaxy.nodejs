@@ -1,9 +1,23 @@
+/**
+ * @fileoverview This module provides routes for course-related operations.
+ */
+
+// Importing required modules
+
 import {Router} from "express";
 
 const courseRouter = Router();
 import {verifyToken} from "../middlewares/middlewares.js";
 
-import {createCourse, deleteCourse} from "../customModules/courses.js";
+
+import {createCourse, deleteCourse, enrollStudent} from "../customModules/courses.js";
+/**
+ * Route to create a new course.
+ * @name post/create
+ * @function
+ * @param {string} path - Express path
+ * @param {callback} middleware - Express middleware.
+ */
 courseRouter.post('/create',verifyToken, async (req, res) => { // WORKS!!
     const courseDetails = {
             title: req.body.title,
@@ -29,8 +43,16 @@ courseRouter.post('/create',verifyToken, async (req, res) => { // WORKS!!
 import {addMultipleModules} from "../customModules/cModule.js";
 import mongoClient, {contentDb} from "../dbSetup.js";
 import {ObjectId} from "mongodb";
+import { updateLastRequest, verifySuperAdmin } from "../customModules/superadmin.js";
 
-courseRouter.post('/create/asOne',verifyToken, async (req, res) => {
+/**
+ * Route to create a new course and its modules as one operation.
+ * @name post/create/asOne
+ * @function
+ * @param {string} path - Express path
+ * @param {callback} middleware - Express middleware.
+ */
+courseRouter.post('/create/asOne',verifySuperAdmin, updateLastRequest, async (req, res) => {
     const data = req.body.data;
 
     // Extract course details and modules from data
@@ -62,8 +84,14 @@ courseRouter.post('/create/asOne',verifyToken, async (req, res) => {
     }
 });
 
-
-courseRouter.post('/delete',verifyToken, async (req, res) => {
+/**
+ * Route to delete a course.
+ * @name post/delete
+ * @function
+ * @param {string} path - Express path
+ * @param {callback} middleware - Express middleware.
+ */
+courseRouter.post('/delete',verifySuperAdmin, updateLastRequest, async (req, res) => {
     const courseID = req.body.courseId;
 
     try {
@@ -76,7 +104,15 @@ courseRouter.post('/delete',verifyToken, async (req, res) => {
 })
 
 
-courseRouter.patch('/update', async (req, res)=> {
+
+/**
+ * Route to update a course.
+ * @name patch/update
+ * @function
+ * @param {string} path - Express path
+ * @param {callback} middleware - Express middleware.
+ */
+courseRouter.patch('/update', verifySuperAdmin, updateLastRequest,async (req, res)=> {
     const courseId = req.body.courseId;
     console.log(courseId)
     if(courseId === undefined) {
@@ -135,6 +171,45 @@ courseRouter.patch('/update', async (req, res)=> {
     }
 
 })
+
+
+/**
+ * Route to enroll a student in a course.
+ * @name post/enroll
+ * @function
+ * @param {string} path - Express path
+ * @param {callback} middleware - Express middleware.
+ */
+courseRouter.post('/enroll',verifyToken, async (req, res) => {
+    try {
+
+        if(req.body.courseId === undefined) {
+            return res.status(400).json({message: "Course ID is missing."});
+        }
+
+        console.log(req.session)
+    const courseId = req.body.courseId;
+    const studentId = req.session.user.uid; // get user's UID
+
+
+
+        await enrollStudent(courseId, studentId);
+        res.status(200).json({message: "Student enrolled."});
+    } catch (e) {
+
+        if (e.message === "Course not found.") {
+            return res.status(404).json({message: "Course not found."});
+        
+        }
+        if (e.message === "Student already enrolled.") {
+            return res.status(400).json({message: "Student already enrolled."});
+        }
+
+        console.log('Error in POST Router /enroll', e);
+        return res.status(500).json({message: 'Internal Server Error'});
+    }
+})
+
 
 
 export default courseRouter;

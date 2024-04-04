@@ -1,12 +1,26 @@
+/**
+ * moduleRoutes.js
+ * This module provides routes for module-related operations.
+ */
+
+// Importing necessary modules
 import {Router} from "express";
-
-const moduleRouter = Router();
-
-
+import { verifySuperAdmin, updateLastRequest } from "../customModules/superadmin.js";
 import {createModule} from "../customModules/cModule.js";
 import {ObjectId} from "mongodb";
 import mongoClient, {contentDb} from "../dbSetup.js";
-moduleRouter.post('/create/', async (req, res) => { // WORKS!!
+import {deleteMultipleVideosWithUpdates} from "../customModules/video.js";
+import {deleteModule} from "../customModules/cModule.js";
+
+// Initializing express router
+const moduleRouter = Router();
+
+/**
+ * Route for creating a module
+ * This route accepts a request body with module details
+ * It is protected by superadmin verification middleware
+ */
+moduleRouter.post('/create/', verifySuperAdmin, updateLastRequest, async (req, res) => {
     const moduleDetails = {
         title: req.body.title,
         description: req.body.description,
@@ -31,13 +45,12 @@ moduleRouter.post('/create/', async (req, res) => { // WORKS!!
     }
 })
 
-
-
-//delete a module and it's videos
-
-import {deleteMultipleVideosWithUpdates} from "../customModules/video.js";
-import {deleteModule} from "../customModules/cModule.js";
-moduleRouter.post('/delete', async(req, res) => {
+/**
+ * Route for deleting a module and its videos
+ * This route accepts a request body with module ID and course ID
+ * It is protected by superadmin verification middleware
+ */
+moduleRouter.post('/delete',verifySuperAdmin, updateLastRequest, async(req, res) => {
     const moduleId = req.body.moduleId;
     const courseId = req.body.courseId;
 
@@ -55,4 +68,5 @@ moduleRouter.post('/delete', async(req, res) => {
     }
 })
 
+// Exporting the router
 export default moduleRouter;

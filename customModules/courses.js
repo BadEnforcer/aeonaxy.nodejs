@@ -21,6 +21,7 @@ async function createCourseObject(courseDetails) {
         categories: courseDetails.categories,
         price: courseDetails.price,
         modules: [],
+        enrolledStudents : [],
         created_at: Date.now(),
         skill_lvl: courseDetails.skill_lvl
     }
@@ -75,6 +76,48 @@ export async function deleteCourse(courseId) {
         throw new Error('Course not deleted.')
     } else {
         console.log('Course deleted')
+        return true
+    }
+}
+
+
+export async function enrollStudent(courseId, studentId) {
+    const course = await mongoClient.db(contentDb).collection('courses').findOne({_id: new ObjectId(courseId)})
+    if (course === undefined) {
+        console.log('Course not found')
+        throw new Error('Course not found.')
+    }
+
+    
+
+
+    if (course.enrolledStudents.includes(studentId)) {
+        console.log('Student already enrolled')
+        throw new Error('Student already enrolled.')
+    }
+
+    const courseRef = await mongoClient.db(contentDb).collection('courses').updateOne({_id: new ObjectId(courseId)}, {
+        $push: {
+            enrolledStudents: studentId
+        }
+    })
+
+    const studentRef = await mongoClient.db(mainDB).collection('users').updateOne({uid: studentId}, {
+        $push: {
+            enrolledCourses: new ObjectId(courseId)
+        }
+    
+    })
+
+
+    console.log('course', course)
+    console.log('student', studentId, studentRef)
+
+    if (courseRef.modifiedCount === 0 || studentRef.modifiedCount === 0) {
+        console.log('Student not enrolled. Server Error.')
+        throw new Error('Student not enrolled. Server Error.')
+    } else {
+        console.log('Student enrolled') 
         return true
     }
 }

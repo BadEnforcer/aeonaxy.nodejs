@@ -1,6 +1,14 @@
 import {contentDb, mongoClient} from "../dbSetup.js";
 import {ObjectId} from "mongodb";
 
+/**
+ * @function createModuleObject
+ * @description Creates a new module object.
+ * @param {string} courseId - The ID of the course.
+ * @param {Object} moduleDetails - An object containing the details of the module.
+ * @returns {Object} The created module object.
+ * @throws {Error} If any of the required fields are missing or if the sorting index is not a number.
+ */
 async function createModuleObject(courseId, moduleDetails) {
 
     if (courseId === undefined || moduleDetails.title === undefined || moduleDetails.description === undefined ||
@@ -25,7 +33,14 @@ async function createModuleObject(courseId, moduleDetails) {
     }
 }
 
-
+/**
+ * @function createModule
+ * @description Creates a new module and adds it to a course.
+ * @param {string} courseId - The ID of the course.
+ * @param {Object} moduleDetails - An object containing the details of the module.
+ * @returns {Object} The reference to the created module in the database.
+ * @throws {Error} If the module could not be created or if the course could not be found in the database.
+ */
 export async function createModule(courseId, moduleDetails) {
     // add new
     let moduleRef
@@ -51,18 +66,39 @@ export async function createModule(courseId, moduleDetails) {
 }
 
 
+/**
+ * @function getAllModules
+ * @description Retrieves all modules for a given course.
+ * @param {string} courseId - The ID of the course.
+ * @returns {Array} An array of module objects.
+ * @throws {Error} If no modules are found for the course.
+ */
 export async function getAllModules(courseId) {
     const modules = await mongoClient.db(contentDb).collection('modules').find({courseId: ObjectId(courseId)}).toArray()
     if (modules.length === 0) throw new Error('No modules found for this course.')
     else return modules
 }
 
+/**
+ * @function getModule
+ * @description Retrieves a specific module.
+ * @param {string} moduleId - The ID of the module.
+ * @returns {Object} The module object.
+ * @throws {Error} If the module is not found.
+ */
 export async function getModule(moduleId) {
     const module = await mongoClient.db(contentDb).collection('modules').findOne({_id: ObjectId(moduleId)})
     if (!module) throw new Error('Module not found.')
     else return module
 }
 
+/**
+ * @function deleteModule
+ * @description Deletes a specific module and removes it from its course.
+ * @param {string} moduleId - The ID of the module.
+ * @returns {Object} The result of the delete operation.
+ * @throws {Error} If the module or its course is not found.
+ */
 export async function deleteModule(moduleId) {
     let id
     if (typeof moduleId !== ObjectId) {
@@ -97,6 +133,14 @@ export async function deleteModule(moduleId) {
 
 }
 
+/**
+ * @function addMultipleModules
+ * @description Adds multiple modules to a course.
+ * @param {string} courseId - The ID of the course.
+ * @param {Array} modules - An array of module objects.
+ * @returns {Array} An array of references to the created modules in the database.
+ * @throws {Error} If a module could not be created.
+ */
 export async function addMultipleModules(courseId, modules) {
     let moduleRefs = []
     for (let module of modules) {

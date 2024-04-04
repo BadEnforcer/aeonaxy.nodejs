@@ -1,6 +1,5 @@
-
-
 import jwt from "jsonwebtoken";
+
 // verify the jwt for each request
 export async function verifyToken(req = Request, res = Response, next) {
     const authHeader = req.headers['authorization'];
@@ -20,3 +19,24 @@ export async function verifyToken(req = Request, res = Response, next) {
         next();
     });
 }
+
+export async function verifySuperAdmin(req = Request, res = Response, next) {
+    // get the 
+
+    next();
+}
+
+export async function preventDuplicateLogin(req = Request, res = Response, next) {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) {
+        next();
+    } else {
+        jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
+            if (err) {
+                next();
+            } else {
+                res.status(403).json({ message: 'Please log out before logging in again.' });
+            }
+        });
+    }
+};
