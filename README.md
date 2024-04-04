@@ -3,6 +3,15 @@
 
 This project is a Node.js application that provides a set of APIs for managing courses. It uses Express.js for routing and MongoDB for data storage.
 
+## note
+1. Please make sure you use the correct Bearer Token during operation. if you are using postman, you will have to update your token if it expires.
+2. Before First Launch, replace resend_api_key in custom_modules/resendapi.js
+3. Update the ENV variables if needed
+
+# POSTMAN DOCUMENTAION
+
+<a href="https://documenter.getpostman.com/view/23771419/2sA35LUeYP">Documentation</a>
+
 ## Routes
 
 ### POST /create/asOne
