@@ -4,7 +4,7 @@ import {mongoClient, contentDb, mainDB} from "../dbSetup.js";
 
 async function createCourseObject(courseDetails) {
     // check for missing values
-    if (courseDetails.title  === undefined || courseDetails.description === undefined ||
+    if (courseDetails.title === undefined || courseDetails.description === undefined ||
         courseDetails.categories === undefined || courseDetails.price === undefined ||
         courseDetails.skill_lvl === undefined) {
 
@@ -39,6 +39,7 @@ export async function createCourse(courseDetails) {
     }
 }
 
+import {deleteModule} from "./cModule.js";
 
 export async function getCourse(courseId) {
     const course = await mongoClient.db(contentDb).collection('courses').findOne({_id: ObjectId(courseId)})
@@ -52,34 +53,28 @@ export async function getCourse(courseId) {
 }
 
 export async function deleteCourse(courseId) {
-    const course = await mongoClient.db(contentDb).collection('courses').findOne({_id: ObjectId(courseId)})
-    if (!course) throw new Error('Course not found.')
+    const course = await mongoClient.db(contentDb).collection('courses').findOne({_id: new ObjectId(courseId)})
+    if (!course) {
+        console.log('Course not found')
+        throw new Error("Course not found")
+    }
 
-    // delete videos in each module
-    const modules = course.modules
-    for (let i = 0; i < modules.length; i++) {
-        const module = modules[i]
-        const videos = module.videos
-        for (let j = 0; j < videos.length; j++) {
-            const video = videos[j]
-            const deletedVideo = await mongoClient.db(contentDb).collection('videos').deleteOne({_id: ObjectId(video)})
-            if (deletedVideo.deletedCount === 0) console.log(`WARNING: No video deleted with ID: ${video} .either the video did not exist or there is an error somewhere`)
+    // Check if course.modules is not empty
+    if (course.modules && course.modules.length > 0) {
+        console.log('Course has modules')
+        for (let moduleId of course.modules) {
+            console.log('Deleting module', moduleId)
+            await deleteModule(moduleId) // this will delete the videos also
         }
     }
 
-
-    const deletedModules = await mongoClient.db(contentDb).collection('modules').deleteMany({course_id: ObjectId(courseId)})
-    if (deletedModules.deletedCount === 0) console.log('WARNING: No modules deleted. either the course was empty or there is an error somewhere')
-
-
-    const deletedCourse = await mongoClient.db(contentDb).collection('courses').deleteOne({_id: ObjectId(courseId)})
-    if (deletedCourse.deletedCount === 0) {
+    // delete course now
+    const courseRef = await mongoClient.db(contentDb).collection('courses').deleteOne({_id: new ObjectId(courseId)})
+    if (courseRef.deletedCount === 0) {
         console.log('Course not deleted')
-        throw new Error('Course not deleted in final Check.')
+        throw new Error('Course not deleted.')
     } else {
         console.log('Course deleted')
-        return deletedCourse
+        return true
     }
-
-
 }

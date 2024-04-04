@@ -6,24 +6,24 @@ const videoRouter = Router();
 import multer from 'multer'
 // ! Setup Multer for file uploads
 const storage = multer.memoryStorage(); // Store files in memory
-const upload = multer({ storage: storage });
+const upload = multer({storage: storage});
 
 
-
-import {addVideo, deleteVideo} from "../customModules/video.js";
+import {addVideo, deleteVideoWithUpdate} from "../customModules/video.js";
 import {ObjectId} from "mongodb";
 import mongoClient, {contentDb} from "../dbSetup.js";
-videoRouter.post('/create',upload.single('video'), async (req, res) => { // WORKS!!
+
+videoRouter.post('/create', upload.single('video'), async (req, res) => { // WORKS!!
     const videoDetails = {
-            title: req.body.title,
-            description: req.body.description,
-            content: req.file,
-            sortingIndex: req.body.sortingIndex
-        }
+        title: req.body.title,
+        description: req.body.description,
+        content: req.file,
+        sortingIndex: req.body.sortingIndex
+    }
 
     try {
         const createdVideo = await addVideo(req.body.moduleId, videoDetails);
-        if (createdVideo=== [] || createdVideo === null || createdVideo === undefined) {
+        if (createdVideo === [] || createdVideo === null || createdVideo === undefined) {
             return res.status(400).json({message: "Video Not created, Server Error."});
         }
 
@@ -39,14 +39,36 @@ videoRouter.post('/create',upload.single('video'), async (req, res) => { // WORK
     }
 })
 
-videoRouter.get('/delete', (req, res) => {
+videoRouter.get('/delete/one', (req, res) => {
     const videoId = req.body.videoId
     if (videoId === null || videoId === undefined || videoId === "") {
         return res.status(400).json({message: "Video ID is missing."});
     }
 
+    const isDeleted = deleteVideoWithUpdate(videoId);
+    if (isDeleted === false) {
+        return res.status(400).json({message: "Video Not Deleted, Server Error."});
+    } else {
+        return res.status(200).json({message: "Video Deleted."});
+    }
+})
 
-    return res.status(200).json({message: "Delete Video Route"});
+
+// delete multiple
+import {deleteMultipleVideosWithUpdates} from "../customModules/video.js";
+
+videoRouter.get('/delete/multiple', async (req, res) => {
+    const videoIds = req.body.videoIds
+
+    if (videoIds === null || videoIds === undefined || videoIds === "")
+        return res.status(400).json({message: "Video IDs are missing."});
+
+    try {
+        await deleteMultipleVideosWithUpdates(videoIds);
+    } catch (e) {
+        console.log('Error in POST Router /delete/multiple', e);
+        return res.status(500).json({message: 'Internal Server Error'});
+    }
 })
 
 export default videoRouter;

@@ -4,6 +4,8 @@ const expressApp = express();
 const port = process.env.PORT || 8080;
 
 expressApp.use(express.json());
+expressApp.use(express.urlencoded({ extended: true }));
+expressApp.use(cookieParser());
 
 
 // ? REGION Routes
@@ -21,6 +23,7 @@ expressApp.use('/api/video', videoRoutes)
 
 // ! webhooks
 import resendWebhooksRouter from "./routes/resendWebhooks.js";
+import cookieParser from "cookie-parser";
 expressApp.use('/webhooks', resendWebhooksRouter)
 
 // ? REGION Routes
